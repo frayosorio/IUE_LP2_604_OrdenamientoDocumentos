@@ -10,6 +10,9 @@ import javax.swing.ImageIcon;
 import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 
+import servicios.DocumentosServicio;
+import servicios.Util;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 
@@ -26,8 +29,6 @@ public class FrmOrdenamiento extends JFrame {
 
     private JTable tblDocumentos;
 
-    private String[] encabezados = new String[] { "#", "Primer Apellido", "Segundo Apellido", "Nombres", "Documento" };
-
     public FrmOrdenamiento() {
 
         tbOrdenamiento = new JToolBar();
@@ -41,10 +42,9 @@ public class FrmOrdenamiento extends JFrame {
         txtBuscar = new JTextField();
 
         tblDocumentos = new JTable();
-        var dtm = new DefaultTableModel(null, encabezados);
+        var dtm = new DefaultTableModel(null, DocumentosServicio.getEncabezados());
         tblDocumentos.setModel(dtm);
-        JScrollPane spDocumentos=new JScrollPane(tblDocumentos);
-
+        JScrollPane spDocumentos = new JScrollPane(tblDocumentos);
 
         setSize(600, 400);
         setTitle("Ordenamiento Documentos");
@@ -87,19 +87,55 @@ public class FrmOrdenamiento extends JFrame {
         getContentPane().add(tbOrdenamiento, BorderLayout.NORTH);
         getContentPane().add(spDocumentos, BorderLayout.CENTER);
 
+        cargarDatos();
+    }
+
+    private void cargarDatos() {
         String nombreArchivo = System.getProperty("user.dir")
                 + "/src/datos/Datos.csv";
+        DocumentosServicio.cargar(nombreArchivo);
+        DocumentosServicio.mostrar(tblDocumentos);
     }
+
+    private boolean ejecutando;
 
     private void btnOrdenarBurbujaClick(ActionEvent evt) {
         if (cmbCriterio.getSelectedIndex() >= 0) {
+            Util.iniciarCronometro();
+            ejecutando = true;
 
+            new Thread(() -> {
+                DocumentosServicio.ordenarBurbuja(cmbCriterio.getSelectedIndex());
+                ejecutando = false;
+                DocumentosServicio.mostrar(tblDocumentos);
+            }).start();
+
+            new Thread(() -> {
+                while (ejecutando) {
+                    Util.pausarMilisegundos(250);
+                    txtTiempo.setText(Util.getTextoTiempoCronometro());
+                }
+            }).start();
         }
     }
 
     private void btnOrdenarRapidoClick(ActionEvent evt) {
         if (cmbCriterio.getSelectedIndex() >= 0) {
+            Util.iniciarCronometro();
+            ejecutando = true;
 
+            new Thread(() -> {
+                DocumentosServicio.ordenarRapido(cmbCriterio.getSelectedIndex());
+                ejecutando = false;
+                DocumentosServicio.mostrar(tblDocumentos);
+            }).start();
+
+            new Thread(() -> {
+                while (ejecutando) {
+                    Util.pausarMilisegundos(50);
+                    txtTiempo.setText(Util.getTextoTiempoCronometro());
+                }
+            }).start();
         }
     }
 
