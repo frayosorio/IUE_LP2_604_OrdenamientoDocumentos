@@ -1,6 +1,7 @@
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -10,6 +11,7 @@ import javax.swing.ImageIcon;
 import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
 
+import controladores.OrdenamientoControlador;
 import servicios.DocumentosServicio;
 import servicios.Util;
 
@@ -73,7 +75,12 @@ public class FrmOrdenamiento extends JFrame {
 
         cmbCriterio.setModel(new DefaultComboBoxModel(
                 new String[] { "Nombre Completo, Tipo de Documento", "Tipo de Documento, Nombre Completo" }));
+        cmbCriterio.addActionListener(evt -> {
+            OrdenamientoControlador.setCriterio(cmbCriterio);
+        });
+
         tbOrdenamiento.add(cmbCriterio);
+
         tbOrdenamiento.add(txtTiempo);
 
         btnBuscar.setIcon(new ImageIcon(getClass().getResource("/iconos/Buscar.png")));
@@ -87,56 +94,17 @@ public class FrmOrdenamiento extends JFrame {
         getContentPane().add(tbOrdenamiento, BorderLayout.NORTH);
         getContentPane().add(spDocumentos, BorderLayout.CENTER);
 
-        cargarDatos();
+        OrdenamientoControlador.setTblDocumentos(tblDocumentos);
+        OrdenamientoControlador.setTxtTiempo(txtTiempo);
+        OrdenamientoControlador.cargarDatos();
     }
-
-    private void cargarDatos() {
-        String nombreArchivo = System.getProperty("user.dir")
-                + "/src/datos/Datos.csv";
-        DocumentosServicio.cargar(nombreArchivo);
-        DocumentosServicio.mostrar(tblDocumentos);
-    }
-
-    private boolean ejecutando;
 
     private void btnOrdenarBurbujaClick(ActionEvent evt) {
-        if (cmbCriterio.getSelectedIndex() >= 0) {
-            Util.iniciarCronometro();
-            ejecutando = true;
-
-            new Thread(() -> {
-                DocumentosServicio.ordenarBurbuja(cmbCriterio.getSelectedIndex());
-                ejecutando = false;
-                DocumentosServicio.mostrar(tblDocumentos);
-            }).start();
-
-            new Thread(() -> {
-                while (ejecutando) {
-                    Util.pausarMilisegundos(250);
-                    txtTiempo.setText(Util.getTextoTiempoCronometro());
-                }
-            }).start();
-        }
+        OrdenamientoControlador.ordenarBurbuja();
     }
 
     private void btnOrdenarRapidoClick(ActionEvent evt) {
-        if (cmbCriterio.getSelectedIndex() >= 0) {
-            Util.iniciarCronometro();
-            ejecutando = true;
-
-            new Thread(() -> {
-                DocumentosServicio.ordenarRapido(cmbCriterio.getSelectedIndex());
-                ejecutando = false;
-                DocumentosServicio.mostrar(tblDocumentos);
-            }).start();
-
-            new Thread(() -> {
-                while (ejecutando) {
-                    Util.pausarMilisegundos(50);
-                    txtTiempo.setText(Util.getTextoTiempoCronometro());
-                }
-            }).start();
-        }
+        OrdenamientoControlador.ordenarRapido();
     }
 
     private void btnOrdenarInsercionClick(ActionEvent evt) {
@@ -144,7 +112,36 @@ public class FrmOrdenamiento extends JFrame {
     }
 
     private void btnBuscar(ActionEvent evt) {
-
+        /*
+         * var dato = txtBuscar.getText().trim();
+         * if (!dato.isEmpty()) {
+         * Util.iniciarCronometro();
+         * ejecutando = true;
+         * 
+         * new Thread(() -> {
+         * var indice = DocumentosServicio.buscarBinariaPorNombre(dato);
+         * ejecutando = false;
+         * if (indice >= 0) {
+         * tblDocumentos.setRowSelectionInterval(indice, indice);
+         * tblDocumentos.scrollRectToVisible(tblDocumentos.getCellRect(indice, 0,
+         * true));
+         * } else {
+         * tblDocumentos.clearSelection();
+         * JOptionPane.showMessageDialog(null, "Dato no encontrado");
+         * }
+         * }).start();
+         * 
+         * new Thread(() -> {
+         * while (ejecutando) {
+         * Util.pausarMilisegundos(50);
+         * txtTiempo.setText(Util.getTextoTiempoCronometro());
+         * }
+         * }).start();
+         * } else {
+         * JOptionPane.showMessageDialog(null,
+         * "No ha especificado un dato para buscar");
+         * }
+         */
     }
 
 }

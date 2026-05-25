@@ -75,6 +75,8 @@ public class DocumentosServicio {
         tbl.setModel(dtm);
     }
 
+    /********** Ordenamientos **********/
+
     private static boolean esMayor(Documento d1, Documento d2, int criterio) {
         if (criterio == 0) // primero nombre completo y luego el tipo de documento
         {
@@ -134,6 +136,112 @@ public class DocumentosServicio {
 
     public static void ordenarRapido(int criterio) {
         ordenarRapido(0, documentos.size() - 1, criterio);
+    }
+
+    /********** Busquedas **********
+     * 
+     * Busqueda BINARIA (los datos deben estar ordenados)
+     * 
+     * Lista Completa
+     * ┌───────┬─────────┬───────┬────────┬────────┬────────┬────────┐
+     * │ Ana   │ Carlos  │ Juan  │ Maria  │ Pedro  │ Sofia  │ Zulema │
+     * └───────┴─────────┴───────┴────────┴────────┴────────┴────────┘
+     *     0        1        2        3        4        5        6
+     * 
+     * Buscar -> "Pedro"
+     * 
+     * ┌───────┬─────────┬───────┬────────┬────────┬────────┬────────┐
+     * │ Ana   │ Carlos  │ Juan  │ Maria  │ Pedro  │ Sofia  │ Zulema │
+     * └───────┴─────────┴───────┴────────┴────────┴────────┴────────┘
+     *     0        1        2        3        4        5        6
+     *                                ↑
+     *                              medio
+     * 
+     * "Pedro" > "Maria"
+     * 
+     * Nueva búsqueda
+     * ┌────────┬────────┬────────┐
+     * │ Pedro  │ Sofia  │ Zulema │
+     * └────────┴────────┴────────┘
+     *      4        5       6
+     *               ↑
+     *             medio
+     * 
+     * "Pedro" < "Sofia"
+     * 
+     * Última búsqueda
+     * ┌────────┐
+     * │ Pedro  │
+     * └────────┘
+     *     4
+     *     ↑
+     *  medio
+     * 
+     * "Pedro" = "Pedro" (ENCONTRADO)
+     * 
+     * ------------------------------
+     * Arbol de recursividad (llamadas recursivas)
+     * buscar("Pedro", 0, 6)
+     *          │
+     *          ▼
+     *       medio=3
+     *       "Maria"
+     * │
+     * Pedro > Maria
+     * │
+     * ▼
+     * buscar("Pedro", 4, 6)
+     * │
+     * ▼
+     * medio=5
+     * Sofia
+     * │
+     * Pedro < Sofia
+     * │
+     * ▼
+     * buscar("Pedro", 4, 4)
+     * │
+     * ▼
+     * medio=4
+     * Pedro
+     * │
+     * ▼
+     * ENCONTRADO
+     * 
+     */
+
+    public static int buscarBinariaPorNombre(String texto) {
+        texto = ignorarTildesyMayusculas(texto);
+        return buscarBinariaPorNombre(texto, 0, documentos.size() - 1);
+    }
+
+    private static String ignorarTildesyMayusculas(String texto){
+        return texto.toLowerCase()
+            .replace("á", "a")
+            .replace("é", "e")
+            .replace("í", "i")
+            .replace("ó", "o")
+            .replace("ú", "u")
+            .replace("ü", "u");
+    }
+
+    private static int buscarBinariaPorNombre(String texto, int inicio, int fin) {
+        if (inicio > fin)
+            return -1;
+
+        // hallar el punto medio
+        int medio = (inicio + fin) / 2;
+        var datoAComparar=ignorarTildesyMayusculas(documentos.get(medio).getNombreCompleto());
+
+        //comparar para la llamada recursiva
+        if (datoAComparar.startsWith(texto)) {
+            return medio;
+        }
+        if (texto.compareTo(datoAComparar) < 0) {
+            return buscarBinariaPorNombre(texto, inicio, medio - 1);
+        }
+
+        return buscarBinariaPorNombre(texto, medio + 1, fin);
     }
 
 }
