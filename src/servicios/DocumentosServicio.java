@@ -11,6 +11,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 import modelos.Documento;
+import modelos.RangoBusqueda;
 
 public class DocumentosServicio {
 
@@ -138,7 +139,7 @@ public class DocumentosServicio {
         ordenarRapido(0, documentos.size() - 1, criterio);
     }
 
-    /********** Busquedas **********
+       /********** Busquedas **********
      * 
      * Busqueda BINARIA (los datos deben estar ordenados)
      * 
@@ -175,7 +176,7 @@ public class DocumentosServicio {
      * └────────┘
      *     4
      *     ↑
-     *  medio
+     *   medio
      * 
      * "Pedro" = "Pedro" (ENCONTRADO)
      * 
@@ -186,43 +187,64 @@ public class DocumentosServicio {
      *          ▼
      *       medio=3
      *       "Maria"
-     * │
-     * Pedro > Maria
-     * │
-     * ▼
+     *          │
+     *     "Pedro" > "Maria"
+     *          │
+     *          ▼
      * buscar("Pedro", 4, 6)
-     * │
-     * ▼
-     * medio=5
-     * Sofia
-     * │
-     * Pedro < Sofia
-     * │
-     * ▼
+     *          │
+     *          ▼
+     *       medio=5
+     *       "Sofia"
+     *          │
+     *    "Pedro" < "Sofia"
+     *          │
+     *          ▼
      * buscar("Pedro", 4, 4)
-     * │
-     * ▼
-     * medio=4
-     * Pedro
-     * │
-     * ▼
-     * ENCONTRADO
+     *          │
+     *          ▼
+     *       medio=4
+     *       "Pedro"
+     *          │
+     *          ▼
+     *      ENCONTRADO
      * 
      */
+ 
 
-    public static int buscarBinariaPorNombre(String texto) {
+    public static RangoBusqueda buscarBinariaPorNombre(String texto) {
         texto = ignorarTildesyMayusculas(texto);
-        return buscarBinariaPorNombre(texto, 0, documentos.size() - 1);
+        var posicion = buscarBinariaPorNombre(texto, 0, documentos.size() - 1);
+
+        if (posicion == -1) {
+            return null;
+        }
+
+        var inicio = posicion;
+        while (inicio > 0) {
+            var datoAComparar = ignorarTildesyMayusculas(documentos.get(inicio - 1).getNombreCompleto());
+            if (!datoAComparar.startsWith(texto))
+                break;
+            inicio--;
+        }
+        var fin = posicion;
+        while (posicion < documentos.size() - 1) {
+            var datoAComparar = ignorarTildesyMayusculas(documentos.get(fin + 1).getNombreCompleto());
+            if (!datoAComparar.startsWith(texto))
+                break;
+            fin++;
+        }
+        return new RangoBusqueda(inicio, fin);
     }
 
-    private static String ignorarTildesyMayusculas(String texto){
+    private static String ignorarTildesyMayusculas(String texto) {
         return texto.toLowerCase()
-            .replace("á", "a")
-            .replace("é", "e")
-            .replace("í", "i")
-            .replace("ó", "o")
-            .replace("ú", "u")
-            .replace("ü", "u");
+                .replace("á", "a")
+                .replace("é", "e")
+                .replace("í", "i")
+                .replace("ó", "o")
+                .replace("ú", "u")
+                .replace("ü", "u");
     }
 
     private static int buscarBinariaPorNombre(String texto, int inicio, int fin) {
@@ -231,9 +253,9 @@ public class DocumentosServicio {
 
         // hallar el punto medio
         int medio = (inicio + fin) / 2;
-        var datoAComparar=ignorarTildesyMayusculas(documentos.get(medio).getNombreCompleto());
+        var datoAComparar = ignorarTildesyMayusculas(documentos.get(medio).getNombreCompleto());
 
-        //comparar para la llamada recursiva
+        // comparar para la llamada recursiva
         if (datoAComparar.startsWith(texto)) {
             return medio;
         }

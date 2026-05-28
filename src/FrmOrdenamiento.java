@@ -112,36 +112,7 @@ public class FrmOrdenamiento extends JFrame {
     }
 
     private void btnBuscar(ActionEvent evt) {
-        /*
-         * var dato = txtBuscar.getText().trim();
-         * if (!dato.isEmpty()) {
-         * Util.iniciarCronometro();
-         * ejecutando = true;
-         * 
-         * new Thread(() -> {
-         * var indice = DocumentosServicio.buscarBinariaPorNombre(dato);
-         * ejecutando = false;
-         * if (indice >= 0) {
-         * tblDocumentos.setRowSelectionInterval(indice, indice);
-         * tblDocumentos.scrollRectToVisible(tblDocumentos.getCellRect(indice, 0,
-         * true));
-         * } else {
-         * tblDocumentos.clearSelection();
-         * JOptionPane.showMessageDialog(null, "Dato no encontrado");
-         * }
-         * }).start();
-         * 
-         * new Thread(() -> {
-         * while (ejecutando) {
-         * Util.pausarMilisegundos(50);
-         * txtTiempo.setText(Util.getTextoTiempoCronometro());
-         * }
-         * }).start();
-         * } else {
-         * JOptionPane.showMessageDialog(null,
-         * "No ha especificado un dato para buscar");
-         * }
-         */
+        OrdenamientoControlador.buscar(txtBuscar.getText().trim());
     }
 
 }
